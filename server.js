@@ -38,6 +38,15 @@ app.get("/api/workouts", (req, res) => {
       res.status(400).json(err);
     });
 });
+app.put("/api/workouts/:id", (req, res) => {
+  console.log(req.body)
+  Workout.updateOne({_id: req.params.id}, {
+    $push: {exercises: req.body}
+  })
+    .then(dbWorkout => {
+      res.json(dbWorkout)
+    }).catch(err => res.json(err))
+})
 
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}!`);
