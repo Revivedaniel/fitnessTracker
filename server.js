@@ -11,42 +11,63 @@ app.use(express.json());
 
 app.use(express.static("public"));
 
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/fitnessTracker", {
-  useNewUrlParser: true,
-  useFindAndModify: false
-});
+mongoose.connect(
+  process.env.MONGODB_URI || "mongodb://localhost/fitnessTracker",
+  {
+    useNewUrlParser: true,
+    useFindAndModify: false,
+  }
+);
 
-const Workout = require("./models/workout.js")
+const Workout = require("./models/workout.js");
 
 //Home Routes
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"))
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 app.get("/exercise", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "exercise.html"))
+  res.sendFile(path.join(__dirname, "public", "exercise.html"));
 });
 app.get("/stats", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "stats.html"))
+  res.sendFile(path.join(__dirname, "public", "stats.html"));
 });
 //API Routes
-app.get("/api/workouts", (req, res) => {
-  Workout.find({})
-    .then(dbWorkouts => {
-      res.json(dbWorkouts);
+app.get("/api/workouts", async (req, res) => {
+  try {
+    const workout = await Workout.aggregate([
+      {
+        $addFields: {
+          totalDuration: {
+            $sum: "$exercises.duration",
+          },
+        },
+      },
+    ]);
+
+    res.json(workout);
+  } catch (err) {
+    res.json(err);
+  }
+});
+app.post("/api/workouts", (req, res) => {
+  Workout.create(req.body)
+    .then((dbWorkout) => {
+      res.json(dbWorkout);
     })
-    .catch(err => {
-      res.status(400).json(err);
-    });
+    .catch((err) => res.json(err));
 });
 app.put("/api/workouts/:id", (req, res) => {
-  console.log(req.body)
-  Workout.updateOne({_id: req.params.id}, {
-    $push: {exercises: req.body}
-  })
-    .then(dbWorkout => {
-      res.json(dbWorkout)
-    }).catch(err => res.json(err))
-})
+  Workout.updateOne(
+    { _id: req.params.id },
+    {
+      $push: { exercises: req.body },
+    }
+  )
+    .then((dbWorkout) => {
+      res.json(dbWorkout);
+    })
+    .catch((err) => res.json(err));
+});
 
 app.listen(PORT, () => {
   console.log(`App running on port ${PORT}!`);
