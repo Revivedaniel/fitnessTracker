@@ -49,6 +49,23 @@ app.get("/api/workouts", async (req, res) => {
     res.json(err);
   }
 });
+app.get("/api/workouts/range", async (req, res) => {
+  try {
+    const workout = await Workout.aggregate([
+      {
+        $addFields: {
+          totalDuration: {
+            $sum: "$exercises.duration",
+          },
+        },
+      },
+    ]).sort({ day: -1 });
+
+    res.json(workout);
+  } catch (err) {
+    res.json(err);
+  }
+});
 app.post("/api/workouts", (req, res) => {
   Workout.create(req.body)
     .then((dbWorkout) => {
