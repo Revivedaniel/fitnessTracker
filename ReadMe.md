@@ -6,8 +6,6 @@
 - I built this app to help track and visualize the users fitness routines. As the user Adds more workouts, the Fitsness Tracker keeps track of your total duration and weight lifted. The user can view graphs of those stats on the Dashboard.
 
 ## Table of Contents
-- [Installation](#installation)
-- [Usage](#usage)
 - [Credits](#credits)
 - [License](#license)
 
